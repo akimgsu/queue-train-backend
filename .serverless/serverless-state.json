@@ -1,0 +1,1598 @@
+{
+  "service": {
+    "service": "demo-waiting-queue",
+    "serviceObject": {
+      "name": "demo-waiting-queue"
+    },
+    "provider": {
+      "name": "aws",
+      "httpApi": {
+        "cors": true
+      },
+      "runtime": "nodejs14.x",
+      "iam": {
+        "role": "DefaultRole"
+      },
+      "region": "us-east-1",
+      "versionFunctions": false,
+      "stackName": "demo-waiting-queue",
+      "timeout": 10,
+      "environment": {
+        "waiting_queue_url": {
+          "Ref": "WaitingQueue"
+        },
+        "event_queue_url": {
+          "Ref": "EventQueue"
+        },
+        "waiting_counter_ddb_name": {
+          "Ref": "CounterDDB"
+        },
+        "waiting_ddb_name": {
+          "Ref": "WaitingUserListTable"
+        },
+        "user_view_time_in_mill": "15000",
+        "notification_interval": "5",
+        "socket_api_gateway_id": {
+          "Ref": "WebsocketsApi"
+        },
+        "concurrent": "2"
+      },
+      "deploymentBucket": "572810379428-demo-waiting-queue-deploys",
+      "deploymentPrefix": "demo",
+      "stage": "dev",
+      "deploymentBucketObject": {
+        "name": "572810379428-demo-waiting-queue-deploys",
+        "maxPreviousDeploymentArtifacts": 5,
+        "blockPublicAccess": true
+      },
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "SqsUnderscorehandleUnderscoreeventUnderscoremessageLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/demo-waiting-queue-handle_event_message"
+            }
+          },
+          "SqsUnderscorehandleUnderscorewaitingUnderscoremessageLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/demo-waiting-queue-handle_waiting_message"
+            }
+          },
+          "NotifyUnderscoreendLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/demo-waiting-queue-notify_end"
+            }
+          },
+          "SqsUnderscoredeleteLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/demo-waiting-queue-sqs_delete"
+            }
+          },
+          "CronUnderscoreoneUnderscoregetLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/demo-waiting-queue-cron_one_get"
+            }
+          },
+          "OnConnectLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/demo-waiting-queue-onConnect"
+            }
+          },
+          "OnDisconnectLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/demo-waiting-queue-onDisconnect"
+            }
+          },
+          "DefaultLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/demo-waiting-queue-default"
+            }
+          },
+          "SqsUnderscorehandleUnderscoreeventUnderscoremessageLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "572810379428-demo-waiting-queue-deploys",
+                "S3Key": "demo/demo-waiting-queue/dev/1671824366963-2022-12-23T19:39:26.963Z/demo-waiting-queue.zip"
+              },
+              "Handler": "src/lambda/sqs/event/handleMessage.handler",
+              "Runtime": "nodejs14.x",
+              "FunctionName": "demo-waiting-queue-handle_event_message",
+              "MemorySize": 1024,
+              "Timeout": 10,
+              "Environment": {
+                "Variables": {
+                  "waiting_queue_url": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_queue_url\"]"
+                  },
+                  "event_queue_url": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"event_queue_url\"]"
+                  },
+                  "waiting_counter_ddb_name": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_counter_ddb_name\"]"
+                  },
+                  "waiting_ddb_name": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_ddb_name\"]"
+                  },
+                  "user_view_time_in_mill": "15000",
+                  "notification_interval": "5",
+                  "socket_api_gateway_id": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"socket_api_gateway_id\"]"
+                  },
+                  "concurrent": "2"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "DefaultRole",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "SqsUnderscorehandleUnderscoreeventUnderscoremessageLogGroup",
+              "DefaultRole"
+            ]
+          },
+          "SqsUnderscorehandleUnderscorewaitingUnderscoremessageLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "572810379428-demo-waiting-queue-deploys",
+                "S3Key": "demo/demo-waiting-queue/dev/1671824366963-2022-12-23T19:39:26.963Z/demo-waiting-queue.zip"
+              },
+              "Handler": "src/lambda/sqs/waiting/handleMessage.handler",
+              "Runtime": "nodejs14.x",
+              "FunctionName": "demo-waiting-queue-handle_waiting_message",
+              "MemorySize": 1024,
+              "Timeout": 900,
+              "Environment": {
+                "Variables": {
+                  "waiting_queue_url": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_queue_url\"]"
+                  },
+                  "event_queue_url": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"event_queue_url\"]"
+                  },
+                  "waiting_counter_ddb_name": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_counter_ddb_name\"]"
+                  },
+                  "waiting_ddb_name": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_ddb_name\"]"
+                  },
+                  "user_view_time_in_mill": "15000",
+                  "notification_interval": "5",
+                  "socket_api_gateway_id": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"socket_api_gateway_id\"]"
+                  },
+                  "concurrent": "2",
+                  "stepfunctions_arn": {
+                    "Ref": "WaitingQueueStateMachine"
+                  }
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "HandlerRole",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "SqsUnderscorehandleUnderscorewaitingUnderscoremessageLogGroup",
+              "HandlerRole"
+            ]
+          },
+          "NotifyUnderscoreendLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "572810379428-demo-waiting-queue-deploys",
+                "S3Key": "demo/demo-waiting-queue/dev/1671824366963-2022-12-23T19:39:26.963Z/demo-waiting-queue.zip"
+              },
+              "Handler": "src/lambda/user/notifyEnd.handler",
+              "Runtime": "nodejs14.x",
+              "FunctionName": "demo-waiting-queue-notify_end",
+              "MemorySize": 1024,
+              "Timeout": 10,
+              "Environment": {
+                "Variables": {
+                  "waiting_queue_url": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_queue_url\"]"
+                  },
+                  "event_queue_url": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"event_queue_url\"]"
+                  },
+                  "waiting_counter_ddb_name": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_counter_ddb_name\"]"
+                  },
+                  "waiting_ddb_name": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_ddb_name\"]"
+                  },
+                  "user_view_time_in_mill": "15000",
+                  "notification_interval": "5",
+                  "socket_api_gateway_id": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"socket_api_gateway_id\"]"
+                  },
+                  "concurrent": "2"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "DefaultRole",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "NotifyUnderscoreendLogGroup",
+              "DefaultRole"
+            ]
+          },
+          "SqsUnderscoredeleteLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "572810379428-demo-waiting-queue-deploys",
+                "S3Key": "demo/demo-waiting-queue/dev/1671824366963-2022-12-23T19:39:26.963Z/demo-waiting-queue.zip"
+              },
+              "Handler": "src/lambda/sqs/delete.handler",
+              "Runtime": "nodejs14.x",
+              "FunctionName": "demo-waiting-queue-sqs_delete",
+              "MemorySize": 1024,
+              "Timeout": 10,
+              "Environment": {
+                "Variables": {
+                  "waiting_queue_url": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_queue_url\"]"
+                  },
+                  "event_queue_url": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"event_queue_url\"]"
+                  },
+                  "waiting_counter_ddb_name": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_counter_ddb_name\"]"
+                  },
+                  "waiting_ddb_name": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_ddb_name\"]"
+                  },
+                  "user_view_time_in_mill": "15000",
+                  "notification_interval": "5",
+                  "socket_api_gateway_id": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"socket_api_gateway_id\"]"
+                  },
+                  "concurrent": "2"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "DefaultRole",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "SqsUnderscoredeleteLogGroup",
+              "DefaultRole"
+            ]
+          },
+          "CronUnderscoreoneUnderscoregetLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "572810379428-demo-waiting-queue-deploys",
+                "S3Key": "demo/demo-waiting-queue/dev/1671824366963-2022-12-23T19:39:26.963Z/demo-waiting-queue.zip"
+              },
+              "Handler": "src/lambda/cron/one/get.handler",
+              "Runtime": "nodejs14.x",
+              "FunctionName": "demo-waiting-queue-cron_one_get",
+              "MemorySize": 1024,
+              "Timeout": 10,
+              "Environment": {
+                "Variables": {
+                  "waiting_queue_url": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_queue_url\"]"
+                  },
+                  "event_queue_url": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"event_queue_url\"]"
+                  },
+                  "waiting_counter_ddb_name": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_counter_ddb_name\"]"
+                  },
+                  "waiting_ddb_name": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_ddb_name\"]"
+                  },
+                  "user_view_time_in_mill": "15000",
+                  "notification_interval": "5",
+                  "socket_api_gateway_id": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"socket_api_gateway_id\"]"
+                  },
+                  "concurrent": "2"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "DefaultRole",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "CronUnderscoreoneUnderscoregetLogGroup",
+              "DefaultRole"
+            ]
+          },
+          "OnConnectLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "572810379428-demo-waiting-queue-deploys",
+                "S3Key": "demo/demo-waiting-queue/dev/1671824366963-2022-12-23T19:39:26.963Z/demo-waiting-queue.zip"
+              },
+              "Handler": "src/lambda/user/onConnect.handler",
+              "Runtime": "nodejs14.x",
+              "FunctionName": "demo-waiting-queue-onConnect",
+              "MemorySize": 1024,
+              "Timeout": 10,
+              "Environment": {
+                "Variables": {
+                  "waiting_queue_url": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_queue_url\"]"
+                  },
+                  "event_queue_url": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"event_queue_url\"]"
+                  },
+                  "waiting_counter_ddb_name": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_counter_ddb_name\"]"
+                  },
+                  "waiting_ddb_name": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_ddb_name\"]"
+                  },
+                  "user_view_time_in_mill": "15000",
+                  "notification_interval": "5",
+                  "socket_api_gateway_id": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"socket_api_gateway_id\"]"
+                  },
+                  "concurrent": "2"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "DefaultRole",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "OnConnectLogGroup",
+              "DefaultRole"
+            ]
+          },
+          "OnDisconnectLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "572810379428-demo-waiting-queue-deploys",
+                "S3Key": "demo/demo-waiting-queue/dev/1671824366963-2022-12-23T19:39:26.963Z/demo-waiting-queue.zip"
+              },
+              "Handler": "src/lambda/user/onDisconnect.handler",
+              "Runtime": "nodejs14.x",
+              "FunctionName": "demo-waiting-queue-onDisconnect",
+              "MemorySize": 1024,
+              "Timeout": 10,
+              "Environment": {
+                "Variables": {
+                  "waiting_queue_url": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_queue_url\"]"
+                  },
+                  "event_queue_url": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"event_queue_url\"]"
+                  },
+                  "waiting_counter_ddb_name": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_counter_ddb_name\"]"
+                  },
+                  "waiting_ddb_name": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_ddb_name\"]"
+                  },
+                  "user_view_time_in_mill": "15000",
+                  "notification_interval": "5",
+                  "socket_api_gateway_id": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"socket_api_gateway_id\"]"
+                  },
+                  "concurrent": "2"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "DefaultRole",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "OnDisconnectLogGroup",
+              "DefaultRole"
+            ]
+          },
+          "DefaultLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "572810379428-demo-waiting-queue-deploys",
+                "S3Key": "demo/demo-waiting-queue/dev/1671824366963-2022-12-23T19:39:26.963Z/demo-waiting-queue.zip"
+              },
+              "Handler": "src/lambda/user/default.handler",
+              "Runtime": "nodejs14.x",
+              "FunctionName": "demo-waiting-queue-default",
+              "MemorySize": 1024,
+              "Timeout": 10,
+              "Environment": {
+                "Variables": {
+                  "waiting_queue_url": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_queue_url\"]"
+                  },
+                  "event_queue_url": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"event_queue_url\"]"
+                  },
+                  "waiting_counter_ddb_name": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_counter_ddb_name\"]"
+                  },
+                  "waiting_ddb_name": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"waiting_ddb_name\"]"
+                  },
+                  "user_view_time_in_mill": "15000",
+                  "notification_interval": "5",
+                  "socket_api_gateway_id": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"socket_api_gateway_id\"]"
+                  },
+                  "concurrent": "2"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "DefaultRole",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "DefaultLogGroup",
+              "DefaultRole"
+            ]
+          },
+          "WebsocketsApi": {
+            "Type": "AWS::ApiGatewayV2::Api",
+            "Properties": {
+              "Name": "dev-demo-waiting-queue-websockets",
+              "RouteSelectionExpression": "$request.body.action",
+              "Description": "Serverless Websockets",
+              "ProtocolType": "WEBSOCKET"
+            }
+          },
+          "OnConnectWebsocketsIntegration": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "WebsocketsApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":apigateway:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":lambda:path/2015-03-31/functions/",
+                    {
+                      "Fn::GetAtt": [
+                        "OnConnectLambdaFunction",
+                        "Arn"
+                      ]
+                    },
+                    "/invocations"
+                  ]
+                ]
+              }
+            }
+          },
+          "OnDisconnectWebsocketsIntegration": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "WebsocketsApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":apigateway:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":lambda:path/2015-03-31/functions/",
+                    {
+                      "Fn::GetAtt": [
+                        "OnDisconnectLambdaFunction",
+                        "Arn"
+                      ]
+                    },
+                    "/invocations"
+                  ]
+                ]
+              }
+            }
+          },
+          "DefaultWebsocketsIntegration": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "WebsocketsApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":apigateway:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":lambda:path/2015-03-31/functions/",
+                    {
+                      "Fn::GetAtt": [
+                        "DefaultLambdaFunction",
+                        "Arn"
+                      ]
+                    },
+                    "/invocations"
+                  ]
+                ]
+              }
+            }
+          },
+          "OnConnectLambdaPermissionWebsockets": {
+            "Type": "AWS::Lambda::Permission",
+            "DependsOn": [
+              "WebsocketsApi",
+              "OnConnectLambdaFunction"
+            ],
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "OnConnectLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com"
+            }
+          },
+          "OnDisconnectLambdaPermissionWebsockets": {
+            "Type": "AWS::Lambda::Permission",
+            "DependsOn": [
+              "WebsocketsApi",
+              "OnDisconnectLambdaFunction"
+            ],
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "OnDisconnectLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com"
+            }
+          },
+          "DefaultLambdaPermissionWebsockets": {
+            "Type": "AWS::Lambda::Permission",
+            "DependsOn": [
+              "WebsocketsApi",
+              "DefaultLambdaFunction"
+            ],
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "DefaultLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com"
+            }
+          },
+          "SconnectWebsocketsRoute": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "WebsocketsApi"
+              },
+              "RouteKey": "$connect",
+              "AuthorizationType": "NONE",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "OnConnectWebsocketsIntegration"
+                    }
+                  ]
+                ]
+              }
+            }
+          },
+          "SdisconnectWebsocketsRoute": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "WebsocketsApi"
+              },
+              "RouteKey": "$disconnect",
+              "AuthorizationType": "NONE",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "OnDisconnectWebsocketsIntegration"
+                    }
+                  ]
+                ]
+              }
+            }
+          },
+          "SdefaultWebsocketsRoute": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "WebsocketsApi"
+              },
+              "RouteKey": "$default",
+              "AuthorizationType": "NONE",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "DefaultWebsocketsIntegration"
+                    }
+                  ]
+                ]
+              }
+            }
+          },
+          "WebsocketsDeploymentStage": {
+            "Type": "AWS::ApiGatewayV2::Stage",
+            "Properties": {
+              "ApiId": {
+                "Ref": "WebsocketsApi"
+              },
+              "StageName": "dev",
+              "Description": "Serverless Websockets",
+              "DeploymentId": {
+                "Ref": "WebsocketsDeploymentxwpWH0uAvtTBoh5hq4LnKtFtfPpeQFJDeyYbnp2xko"
+              }
+            }
+          },
+          "WebsocketsDeploymentxwpWH0uAvtTBoh5hq4LnKtFtfPpeQFJDeyYbnp2xko": {
+            "Type": "AWS::ApiGatewayV2::Deployment",
+            "DependsOn": [
+              "SconnectWebsocketsRoute",
+              "SdisconnectWebsocketsRoute",
+              "SdefaultWebsocketsRoute"
+            ],
+            "Properties": {
+              "ApiId": {
+                "Ref": "WebsocketsApi"
+              },
+              "Description": "Serverless Websockets"
+            }
+          },
+          "SqsUnderscorehandleUnderscoreeventUnderscoremessageEventSourceMappingSQSEventQueue": {
+            "Type": "AWS::Lambda::EventSourceMapping",
+            "DependsOn": [
+              "DefaultRole"
+            ],
+            "Properties": {
+              "BatchSize": 10,
+              "EventSourceArn": {
+                "Fn::GetAtt": [
+                  "EventQueue",
+                  "Arn"
+                ]
+              },
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "SqsUnderscorehandleUnderscoreeventUnderscoremessageLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Enabled": true
+            }
+          },
+          "SqsUnderscorehandleUnderscorewaitingUnderscoremessageEventSourceMappingSQSWaitingQueue": {
+            "Type": "AWS::Lambda::EventSourceMapping",
+            "DependsOn": [
+              "HandlerRole"
+            ],
+            "Properties": {
+              "BatchSize": 1,
+              "EventSourceArn": {
+                "Fn::GetAtt": [
+                  "WaitingQueue",
+                  "Arn"
+                ]
+              },
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "SqsUnderscorehandleUnderscorewaitingUnderscoremessageLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Enabled": true
+            }
+          },
+          "HttpApi": {
+            "Type": "AWS::ApiGatewayV2::Api",
+            "Properties": {
+              "Name": "dev-demo-waiting-queue",
+              "ProtocolType": "HTTP",
+              "CorsConfiguration": {
+                "AllowHeaders": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent",
+                  "X-Amzn-Trace-Id"
+                ],
+                "AllowMethods": [
+                  "OPTIONS",
+                  "DELETE"
+                ],
+                "AllowOrigins": [
+                  "*"
+                ]
+              }
+            }
+          },
+          "HttpApiStage": {
+            "Type": "AWS::ApiGatewayV2::Stage",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "StageName": "$default",
+              "AutoDeploy": true,
+              "DefaultRouteSettings": {
+                "DetailedMetricsEnabled": false
+              }
+            }
+          },
+          "SqsUnderscoredeleteLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "SqsUnderscoredeleteLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationSqsUnderscoredelete": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"SqsUnderscoredeleteLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRouteDeleteDevSqs": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "DELETE /dev/sqs",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationSqsUnderscoredelete"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationSqsUnderscoredelete"
+          },
+          "WaitingQueue": {
+            "Type": "AWS::SQS::Queue",
+            "Properties": {
+              "ContentBasedDeduplication": true,
+              "FifoQueue": true,
+              "QueueName": "Waiting-Queue.fifo",
+              "VisibilityTimeout": 900
+            }
+          },
+          "EventQueue": {
+            "Type": "AWS::SQS::Queue",
+            "Properties": {
+              "QueueName": "Event-Queue",
+              "VisibilityTimeout": 60
+            }
+          },
+          "CronOneLambdaPermissions": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "Action": "lambda:InvokeFunction",
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "CronUnderscoreoneUnderscoregetLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Principal": "events.amazonaws.com"
+            }
+          },
+          "CronOneJob": {
+            "Type": "AWS::Events::Rule",
+            "Properties": {
+              "ScheduleExpression": "rate(1 minute)",
+              "State": "ENABLED",
+              "Targets": [
+                {
+                  "Arn": {
+                    "Fn::GetAtt": [
+                      "CronUnderscoreoneUnderscoregetLambdaFunction",
+                      "Arn"
+                    ]
+                  },
+                  "Id": {
+                    "Ref": "CronUnderscoreoneUnderscoregetLambdaFunction"
+                  }
+                }
+              ]
+            }
+          },
+          "DefaultRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "RoleName": "demo-waiting-queue-DefaultLambdaExcutionRole",
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": "sts:AssumeRole"
+                  }
+                ]
+              },
+              "ManagedPolicyArns": [
+                "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+              ],
+              "Policies": [
+                {
+                  "PolicyName": "myPolicyName",
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "s3:*",
+                          "sqs:*",
+                          "logs:*",
+                          "execute-api:*"
+                        ],
+                        "Resource": "*"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "HandlerRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "RoleName": "demo-waiting-queue-HandlerLambdaExcutionRole",
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": "sts:AssumeRole"
+                  }
+                ]
+              },
+              "ManagedPolicyArns": [
+                "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+              ],
+              "Policies": [
+                {
+                  "PolicyName": "myPolicyName",
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "s3:*",
+                          "sqs:*",
+                          "logs:*",
+                          "states:*",
+                          "execute-api:*"
+                        ],
+                        "Resource": "*"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "CounterDDB": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "waiting-user-counter-table",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "counter_id",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "counter_id",
+                  "KeyType": "HASH"
+                }
+              ],
+              "BillingMode": "PAY_PER_REQUEST"
+            }
+          },
+          "WaitingUserListTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "waiting-user-list-table",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "connection_id",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "connection_id",
+                  "KeyType": "HASH"
+                }
+              ],
+              "BillingMode": "PAY_PER_REQUEST"
+            }
+          },
+          "StatesExecutionRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        {
+                          "Fn::Sub": "states.${AWS::Region}.amazonaws.com"
+                        }
+                      ]
+                    },
+                    "Action": "sts:AssumeRole"
+                  }
+                ]
+              },
+              "Path": "/",
+              "Policies": [
+                {
+                  "PolicyName": "StatesExecutionPolicy",
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "lambda:*",
+                          "sqs:*"
+                        ],
+                        "Resource": "*"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "WaitingQueueStateMachine": {
+            "Type": "AWS::StepFunctions::StateMachine",
+            "Properties": {
+              "StateMachineName": "demo-waiting-queue-WaitForProcess",
+              "RoleArn": {
+                "Fn::GetAtt": [
+                  "StatesExecutionRole",
+                  "Arn"
+                ]
+              },
+              "DefinitionString": {
+                "Fn::Sub": [
+                  "{\n  \"Comment\": \"WaitingQueueStateMachine\",\n  \"StartAt\": \"Wait\",\n  \"States\": {\n    \"Wait\": {\n      \"Type\": \"Wait\",\n      \"SecondsPath\": \"$.view_time\",\n      \"Next\": \"Notify User\"\n    },\n    \"Notify User\": {\n      \"Type\": \"Task\",\n      \"Resource\": \"arn:aws:states:::lambda:invoke\",\n      \"Parameters\": {\n        \"Payload\":{\n\n          \"connection_id.$\": \"$.connection_id\",\n          \"waitQueueURL.$\": \"$.waitQueueURL\",\n          \"receiptHandle.$\": \"$.receiptHandle\"\n        },\n        \"FunctionName\": \"${notifiy_end_function_name}:$LATEST\"\n      },\n      \"Retry\": [\n        {\n          \"ErrorEquals\": [\n            \"Lambda.ServiceException\",\n            \"Lambda.AWSLambdaException\",\n            \"Lambda.SdkClientException\"\n          ],\n          \"IntervalSeconds\": 2,\n          \"MaxAttempts\": 6,\n          \"BackoffRate\": 2\n        }\n      ],\n      \"OutputPath\": \"$.Payload\",\n      \"Next\": \"DeleteMessage\"\n    },\n    \"DeleteMessage\": {\n      \"Type\": \"Task\",\n      \"End\": true,\n      \"Parameters\": {\n        \"QueueUrl.$\": \"$.waitQueueURL\",\n        \"ReceiptHandle.$\": \"$.receiptHandle\"\n      },\n      \"Resource\": \"arn:aws:states:::aws-sdk:sqs:deleteMessage\"\n    }\n  }\n}",
+                  {
+                    "account_id": "572810379428",
+                    "notifiy_end_function_name": {
+                      "Fn::GetAtt": [
+                        "NotifyUnderscoreendLambdaFunction",
+                        "Arn"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": "572810379428-demo-waiting-queue-deploys",
+            "Export": {
+              "Name": "sls-demo-waiting-queue-dev-ServerlessDeploymentBucketName"
+            }
+          },
+          "ServiceEndpointWebsocket": {
+            "Description": "URL of the service endpoint",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "wss://",
+                  {
+                    "Ref": "WebsocketsApi"
+                  },
+                  ".execute-api.",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ".",
+                  {
+                    "Ref": "AWS::URLSuffix"
+                  },
+                  "/dev"
+                ]
+              ]
+            },
+            "Export": {
+              "Name": "sls-demo-waiting-queue-dev-ServiceEndpointWebsocket"
+            }
+          },
+          "HttpApiId": {
+            "Description": "Id of the HTTP API",
+            "Value": {
+              "Ref": "HttpApi"
+            },
+            "Export": {
+              "Name": "sls-demo-waiting-queue-dev-HttpApiId"
+            }
+          },
+          "HttpApiUrl": {
+            "Description": "URL of the HTTP API",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://",
+                  {
+                    "Ref": "HttpApi"
+                  },
+                  ".execute-api.",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ".",
+                  {
+                    "Ref": "AWS::URLSuffix"
+                  }
+                ]
+              ]
+            },
+            "Export": {
+              "Name": "sls-demo-waiting-queue-dev-HttpApiUrl"
+            }
+          }
+        }
+      },
+      "vpc": {}
+    },
+    "plugins": [
+      "serverless-deployment-bucket",
+      "serverless-cloudformation-sub-variables"
+    ],
+    "pluginsData": {},
+    "functions": {
+      "sqs_handle_event_message": {
+        "name": "demo-waiting-queue-handle_event_message",
+        "handler": "src/lambda/sqs/event/handleMessage.handler",
+        "events": [
+          {
+            "sqs": {
+              "arn": {
+                "Fn::GetAtt": [
+                  "EventQueue",
+                  "Arn"
+                ]
+              }
+            }
+          }
+        ],
+        "package": {},
+        "memory": 1024,
+        "timeout": 10,
+        "runtime": "nodejs14.x",
+        "vpc": {}
+      },
+      "sqs_handle_waiting_message": {
+        "name": "demo-waiting-queue-handle_waiting_message",
+        "handler": "src/lambda/sqs/waiting/handleMessage.handler",
+        "role": "HandlerRole",
+        "events": [
+          {
+            "sqs": {
+              "batchSize": 1,
+              "arn": {
+                "Fn::GetAtt": [
+                  "WaitingQueue",
+                  "Arn"
+                ]
+              }
+            }
+          }
+        ],
+        "environment": {
+          "stepfunctions_arn": {
+            "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"SqsUnderscorehandleUnderscorewaitingUnderscoremessageLambdaFunction\"][\"Properties\"][\"Environment\"][\"Variables\"][\"stepfunctions_arn\"]"
+          }
+        },
+        "timeout": 900,
+        "package": {},
+        "memory": 1024,
+        "runtime": "nodejs14.x",
+        "vpc": {}
+      },
+      "notify_end": {
+        "name": "demo-waiting-queue-notify_end",
+        "handler": "src/lambda/user/notifyEnd.handler",
+        "events": [],
+        "package": {},
+        "memory": 1024,
+        "timeout": 10,
+        "runtime": "nodejs14.x",
+        "vpc": {}
+      },
+      "sqs_delete": {
+        "name": "demo-waiting-queue-sqs_delete",
+        "handler": "src/lambda/sqs/delete.handler",
+        "events": [
+          {
+            "httpApi": {
+              "path": "/dev/sqs",
+              "method": "delete"
+            },
+            "resolvedMethod": "DELETE",
+            "resolvedPath": "/dev/sqs"
+          }
+        ],
+        "package": {},
+        "memory": 1024,
+        "timeout": 10,
+        "runtime": "nodejs14.x",
+        "vpc": {}
+      },
+      "cron_one_get": {
+        "name": "demo-waiting-queue-cron_one_get",
+        "handler": "src/lambda/cron/one/get.handler",
+        "events": [],
+        "package": {},
+        "memory": 1024,
+        "timeout": 10,
+        "runtime": "nodejs14.x",
+        "vpc": {}
+      },
+      "onConnect": {
+        "name": "demo-waiting-queue-onConnect",
+        "handler": "src/lambda/user/onConnect.handler",
+        "events": [
+          {
+            "websocket": {
+              "route": "$connect"
+            }
+          }
+        ],
+        "package": {},
+        "memory": 1024,
+        "timeout": 10,
+        "runtime": "nodejs14.x",
+        "vpc": {}
+      },
+      "onDisconnect": {
+        "name": "demo-waiting-queue-onDisconnect",
+        "handler": "src/lambda/user/onDisconnect.handler",
+        "events": [
+          {
+            "websocket": {
+              "route": "$disconnect"
+            }
+          }
+        ],
+        "package": {},
+        "memory": 1024,
+        "timeout": 10,
+        "runtime": "nodejs14.x",
+        "vpc": {}
+      },
+      "default": {
+        "name": "demo-waiting-queue-default",
+        "handler": "src/lambda/user/default.handler",
+        "events": [
+          {
+            "websocket": {
+              "route": "$default"
+            }
+          }
+        ],
+        "package": {},
+        "memory": 1024,
+        "timeout": 10,
+        "runtime": "nodejs14.x",
+        "vpc": {}
+      }
+    },
+    "resources": {
+      "Resources": {
+        "WaitingQueue": {
+          "Type": "AWS::SQS::Queue",
+          "Properties": {
+            "ContentBasedDeduplication": true,
+            "FifoQueue": true,
+            "QueueName": "Waiting-Queue.fifo",
+            "VisibilityTimeout": 900
+          }
+        },
+        "EventQueue": {
+          "Type": "AWS::SQS::Queue",
+          "Properties": {
+            "QueueName": "Event-Queue",
+            "VisibilityTimeout": 60
+          }
+        },
+        "CronOneLambdaPermissions": {
+          "Type": "AWS::Lambda::Permission",
+          "Properties": {
+            "Action": "lambda:InvokeFunction",
+            "FunctionName": {
+              "Fn::GetAtt": [
+                "CronUnderscoreoneUnderscoregetLambdaFunction",
+                "Arn"
+              ]
+            },
+            "Principal": "events.amazonaws.com"
+          }
+        },
+        "CronOneJob": {
+          "Type": "AWS::Events::Rule",
+          "Properties": {
+            "ScheduleExpression": "rate(1 minute)",
+            "State": "ENABLED",
+            "Targets": [
+              {
+                "Arn": {
+                  "Fn::GetAtt": [
+                    "CronUnderscoreoneUnderscoregetLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Id": {
+                  "Ref": "CronUnderscoreoneUnderscoregetLambdaFunction"
+                }
+              }
+            ]
+          }
+        },
+        "DefaultRole": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "RoleName": "demo-waiting-queue-DefaultLambdaExcutionRole",
+            "AssumeRolePolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": [
+                      "lambda.amazonaws.com"
+                    ]
+                  },
+                  "Action": "sts:AssumeRole"
+                }
+              ]
+            },
+            "ManagedPolicyArns": [
+              "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+            ],
+            "Policies": [
+              {
+                "PolicyName": "myPolicyName",
+                "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "s3:*",
+                        "sqs:*",
+                        "logs:*",
+                        "execute-api:*"
+                      ],
+                      "Resource": "*"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "HandlerRole": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "RoleName": "demo-waiting-queue-HandlerLambdaExcutionRole",
+            "AssumeRolePolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": [
+                      "lambda.amazonaws.com"
+                    ]
+                  },
+                  "Action": "sts:AssumeRole"
+                }
+              ]
+            },
+            "ManagedPolicyArns": [
+              "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+            ],
+            "Policies": [
+              {
+                "PolicyName": "myPolicyName",
+                "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "s3:*",
+                        "sqs:*",
+                        "logs:*",
+                        "states:*",
+                        "execute-api:*"
+                      ],
+                      "Resource": "*"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "CounterDDB": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "waiting-user-counter-table",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "counter_id",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "counter_id",
+                "KeyType": "HASH"
+              }
+            ],
+            "BillingMode": "PAY_PER_REQUEST"
+          }
+        },
+        "WaitingUserListTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "waiting-user-list-table",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "connection_id",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "connection_id",
+                "KeyType": "HASH"
+              }
+            ],
+            "BillingMode": "PAY_PER_REQUEST"
+          }
+        },
+        "StatesExecutionRole": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "AssumeRolePolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": [
+                      {
+                        "Fn::Sub": "states.${AWS::Region}.amazonaws.com"
+                      }
+                    ]
+                  },
+                  "Action": "sts:AssumeRole"
+                }
+              ]
+            },
+            "Path": "/",
+            "Policies": [
+              {
+                "PolicyName": "StatesExecutionPolicy",
+                "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "lambda:*",
+                        "sqs:*"
+                      ],
+                      "Resource": "*"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "WaitingQueueStateMachine": {
+          "Type": "AWS::StepFunctions::StateMachine",
+          "Properties": {
+            "StateMachineName": "demo-waiting-queue-WaitForProcess",
+            "RoleArn": {
+              "Fn::GetAtt": [
+                "StatesExecutionRole",
+                "Arn"
+              ]
+            },
+            "DefinitionString": {
+              "Fn::Sub": [
+                "{\n  \"Comment\": \"WaitingQueueStateMachine\",\n  \"StartAt\": \"Wait\",\n  \"States\": {\n    \"Wait\": {\n      \"Type\": \"Wait\",\n      \"SecondsPath\": \"$.view_time\",\n      \"Next\": \"Notify User\"\n    },\n    \"Notify User\": {\n      \"Type\": \"Task\",\n      \"Resource\": \"arn:aws:states:::lambda:invoke\",\n      \"Parameters\": {\n        \"Payload\":{\n\n          \"connection_id.$\": \"$.connection_id\",\n          \"waitQueueURL.$\": \"$.waitQueueURL\",\n          \"receiptHandle.$\": \"$.receiptHandle\"\n        },\n        \"FunctionName\": \"#{notifiy_end_function_name}:$LATEST\"\n      },\n      \"Retry\": [\n        {\n          \"ErrorEquals\": [\n            \"Lambda.ServiceException\",\n            \"Lambda.AWSLambdaException\",\n            \"Lambda.SdkClientException\"\n          ],\n          \"IntervalSeconds\": 2,\n          \"MaxAttempts\": 6,\n          \"BackoffRate\": 2\n        }\n      ],\n      \"OutputPath\": \"$.Payload\",\n      \"Next\": \"DeleteMessage\"\n    },\n    \"DeleteMessage\": {\n      \"Type\": \"Task\",\n      \"End\": true,\n      \"Parameters\": {\n        \"QueueUrl.$\": \"$.waitQueueURL\",\n        \"ReceiptHandle.$\": \"$.receiptHandle\"\n      },\n      \"Resource\": \"arn:aws:states:::aws-sdk:sqs:deleteMessage\"\n    }\n  }\n}",
+                {
+                  "account_id": "572810379428",
+                  "notifiy_end_function_name": {
+                    "Fn::GetAtt": [
+                      "NotifyUnderscoreendLambdaFunction",
+                      "Arn"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "Outputs": {}
+    },
+    "configValidationMode": "warn",
+    "serviceFilename": "serverless.yml",
+    "initialServerlessConfig": {
+      "service": "demo-waiting-queue",
+      "app": "demo-waiting-queue",
+      "provider": {
+        "$ref": "$[\"service\"][\"provider\"]"
+      },
+      "resources": {
+        "$ref": "$[\"service\"][\"resources\"]"
+      },
+      "plugins": {
+        "$ref": "$[\"service\"][\"plugins\"]"
+      },
+      "functions": {
+        "$ref": "$[\"service\"][\"functions\"]"
+      }
+    },
+    "app": "demo-waiting-queue",
+    "layers": {},
+    "isDashboardMonitoringPreconfigured": false,
+    "artifact": "/Users/woo/codes/abe/aws/queue-train-backend/.serverless/demo-waiting-queue.zip"
+  },
+  "package": {
+    "artifactDirectoryName": "demo/demo-waiting-queue/dev/1671824366963-2022-12-23T19:39:26.963Z",
+    "artifact": "demo-waiting-queue.zip"
+  }
+}
